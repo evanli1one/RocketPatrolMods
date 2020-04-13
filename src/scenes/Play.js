@@ -64,25 +64,38 @@ class Play extends Phaser.Scene {
         }
         this.scoreLeft = this.add.text(69,54,this.p1Score, scoreConfig);
 
+        // game over flag
+        this.gameOver = false;
+
         // 60-second play clock
         scoreConfig.fixedWidth = 0;
-        this.clock = this.time.delayedCall(1000, () => {
+        this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 +64, '(F)ire to Restart', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2 +64, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
+            this.gameOver = true;
         }, null, this);
     }
 
     update() {
+        // check key input for restart
+        if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
+            this.scene.restart(this.p1Score);
+        }
+        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
+            this.scene.start("menuScene");
+        }
+
         // scroll starfield
         this.starfield.tilePositionX -= 0.5;
 
-        // update rocket
-        this.p1Rocket.update();
-
-        // update spaceship
-        this.ship01.update();
-        this.ship02.update();
-        this.ship03.update();
+        if(!this.gameOver) {
+            // update rocket
+            this.p1Rocket.update();
+            // update spaceship
+            this.ship01.update();
+            this.ship02.update();
+            this.ship03.update();
+        }
 
         // check collisions
         if(this.checkCollision(this.p1Rocket, this.ship03)) {
@@ -91,10 +104,10 @@ class Play extends Phaser.Scene {
         }
         if(this.checkCollision(this.p1Rocket, this.ship02)) {
             this.p1Rocket.reset();
-            this.shipExplode(this.ship02);        }
+            this.shipExplode(this.ship02);}
         if(this.checkCollision(this.p1Rocket, this.ship01)) {
             this.p1Rocket.reset();
-            this.shipExplode(this.ship01);        }
+            this.shipExplode(this.ship01);}
     }
 
     checkCollision(rocket, ship) {
@@ -122,6 +135,7 @@ class Play extends Phaser.Scene {
         // score increment and repaint
         this.p1Score += ship.points;
         this.scoreLeft.text = this.p1Score;
+        this.sound.play('sfx_explosion');
     }
 }
 

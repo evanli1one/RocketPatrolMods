@@ -28,7 +28,7 @@ class Play extends Phaser.Scene {
 
         // add rocket (p1)
         // constructor(scene, x, y, texture, frame)
-        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket').setScale(0.5, 0.5).setOrigin(0, 0);
+        this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket', 0, 90).setScale(0.5, 0.5);
         
         // add spaceship (x3)
         this.ship01 = new Spaceship(this, game.config.width + 192, 132, 'spaceship', 0, 30).setOrigin(0, 0);
@@ -39,6 +39,39 @@ class Play extends Phaser.Scene {
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+
+        // mouse input
+        // this.Phaser.Input.Pointer.on('pointerdown', this.p1Rocket.pointerShoot);
+
+        // https://phaser.io/examples/v3/view/input/mouse/mouse-down
+        this.input.on('pointerdown', function(pointer) {
+            if(this.p1Rocket.isFiring == false && !this.gameOver){
+                let xDist = pointer.x - this.p1Rocket.x;
+                let yDist = this.p1Rocket.y - pointer.y;
+                let shotAngle = 180 + Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.p1Rocket.x, this.p1Rocket.y, pointer.x, pointer.y));
+
+                let scaleFactor = Math.sqrt(Math.pow(Math.abs(xDist), 2) + Math.pow(Math.abs(yDist), 2)) / 3;
+
+                if(xDist < 0){
+                    this.xSpeed = -xDist / scaleFactor;
+                } else {
+                    this.xSpeed = -xDist / scaleFactor;
+                }            
+                this.ySpeed = yDist / scaleFactor;
+
+                this.p1Rocket.angle = shotAngle - 90;
+                this.p1Rocket.isFiring = true;
+
+                console.log("xSpeed: " + this.xSpeed);
+                console.log("ySpeed: " + this.ySpeed);
+                console.log("xDist: " + xDist);
+                console.log("yDist: " + yDist);
+                console.log("pointer.x: " + pointer.x);
+                console.log("pointer.y: " + pointer.y);
+                console.log("shotAngle: " + shotAngle);
+                console.log("click isFiring: " + this.p1Rocket.isFiring);
+            }
+        }, this);
 
         // animation config
         this.anims.create({
@@ -67,7 +100,7 @@ class Play extends Phaser.Scene {
         // game over flag
         this.gameOver = false;
 
-        // 60-second play clock
+        // play clock
         scoreConfig.fixedWidth = 0;
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
@@ -76,21 +109,7 @@ class Play extends Phaser.Scene {
         }, null, this);
 
         // currTime
-        this.currTime = 0;
-        // timer display
-        let timerConfig = {
-            fontFamily: 'Courier',
-            fontSize: '28px',
-            backgroundColor: '#F3B141',
-            color: '#843605',
-            align: 'right',
-            padding: {
-                top: 5,
-                bottom: 5,
-            },
-            fixedWidth: 0
-        }
-        this.timerRight = this.add.text(400,54,this.currTime, timerConfig);
+        this.timerRight = this.add.text(400,54,'', scoreConfig);
     }
 
     update() {
@@ -112,6 +131,13 @@ class Play extends Phaser.Scene {
             this.ship01.update();
             this.ship02.update();
             this.ship03.update();
+            // shoot rocket toward pointer
+            if(this.p1Rocket.isFiring == true){
+                this.pointerShoot(this.xSpeed, this.ySpeed);
+            } else {
+                // this.pointerMove(Phaser.Input.Pointer);         
+            }
+            
         }
 
         // check collisions
@@ -127,9 +153,10 @@ class Play extends Phaser.Scene {
             this.shipExplode(this.ship01);}
 
         // update timer
-        this.currTime = this.clock.getElapsedSeconds();
+        this.currTime = this.clock.getElapsed();
+        this.displayTime = Phaser.Math.Snap.To((this.clock.delay - this.currTime)/1000, 1);
         if(this.currTime != game.settings.gameTimer/1000){
-            this.timerRight.setText("Timer: " + Phaser.Math.Snap.To(this.currTime, 1) + "/" + game.settings.gameTimer/1000);
+            this.timerRight.setText("Time: " + this.displayTime);
         }
     }
 
@@ -155,10 +182,30 @@ class Play extends Phaser.Scene {
             ship.alpha = 1;
             boom.destroy();
         });
+
+        // max time increase
+        this.clock.delay += ship.points * 100;
+                
         // score increment and repaint
         this.p1Score += ship.points;
         this.scoreLeft.text = this.p1Score;
         // this.sound.play('sfx_explosion');
+        
     }
+
+    pointerShoot(xSpeed, ySpeed){
+        console.log("during isFiring: " + this.p1Rocket.isFiring);
+        this.p1Rocket.x -= xSpeed;
+        this.p1Rocket.y -= ySpeed;
+        // this.sfxRocket.play();
+    }
+
+    // pointerMove(pointer) {
+    //     if(pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
+    //         this.p1Rocket.x -= 5;
+    //     } else if(this.p1Rocket.x <= 577) {
+    //         this.p1Rocket.x += 5;
+    //     }
+    // }
 }
 

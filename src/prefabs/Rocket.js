@@ -57,5 +57,6 @@ class Rocket extends Phaser.GameObjects.Sprite {
         this.isFiring = false;
         this.y = 431;
         this.angle = 0;
+        this.x = game.config.width/2;
     }
 }

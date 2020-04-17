@@ -31,9 +31,19 @@ class Play extends Phaser.Scene {
         this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket', 0, 90).setScale(0.5, 0.5);
         
         // add spaceship (x3)
-        this.ship01 = new Spaceship(this, game.config.width + 192, 132, 'spaceship', 0, 30).setOrigin(0, 0);
-        this.ship02 = new Spaceship(this, game.config.width + 96, 196, 'spaceship', 0, 20).setOrigin(0, 0);
-        this.ship03 = new Spaceship(this, game.config.width, 260, 'spaceship', 0, 10).setOrigin(0, 0);
+        let ship01Rand = this.randStart();
+        let ship02Rand = this.randStart();
+        let ship03Rand = this.randStart();
+        this.ship01 = new Spaceship(this, ship01Rand, 132, 'spaceship', 0, 30, ship01Rand, game.settings.spaceshipSpeed).setOrigin(0, 0);
+        this.ship02 = new Spaceship(this, ship02Rand, 196, 'spaceship', 0, 20, ship02Rand, game.settings.spaceshipSpeed).setOrigin(0, 0);
+        this.ship03 = new Spaceship(this, ship03Rand, 260, 'spaceship', 0, 10, ship03Rand, game.settings.spaceshipSpeed).setOrigin(0, 0);
+        
+        console.log(this.ship01.direction);
+        console.log(this.ship02.direction);
+        console.log(this.ship03.direction);
+        console.log(this.ship01.x);
+        console.log(this.ship02.x);
+        console.log(this.ship03.x);
 
         // define keyboard keys
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
@@ -142,9 +152,19 @@ class Play extends Phaser.Scene {
             if(this.p1Rocket.isFiring == true){
                 this.pointerShoot(this.xSpeed, this.ySpeed);
             } else {
-                // this.pointerMove(Phaser.Input.Pointer);         
+                // this.input.on('gameobjectover', function(pointer) {
+                //     if(pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
+                //         this.p1Rocket.x -= 5;
+                //     } else if(this.p1Rocket.x <= 577) {
+                //         this.p1Rocket.x += 5;
+                //     }
+                // }, this);
+                if(Phaser.Input.Pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
+                    this.p1Rocket.x -= 5;
+                } else if(Phaser.Input.Pointer.x > this.p1Rocket.x && this.p1Rocket.x <= 577) {
+                    this.p1Rocket.x += 5;
+                }
             }
-            
         }
 
         // check collisions
@@ -191,7 +211,7 @@ class Play extends Phaser.Scene {
         });
 
         // max time increase
-        this.clock.delay += ship.points * 100;
+        this.clock.delay += (ship.points + 10)* 100;
                 
         // score increment and repaint
         this.p1Score += ship.points;
@@ -207,6 +227,7 @@ class Play extends Phaser.Scene {
         // this.sfxRocket.play();
     }
 
+
     // pointerMove(pointer) {
     //     if(pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
     //         this.p1Rocket.x -= 5;
@@ -214,5 +235,14 @@ class Play extends Phaser.Scene {
     //         this.p1Rocket.x += 5;
     //     }
     // }
+
+    randStart(){
+        let num = Math.floor(Math.random() * 10);
+        if(num >= 4){
+            return 0;
+        } else {
+            return game.config.width;
+        }
+    }
 }
 

@@ -48,10 +48,16 @@ class Play extends Phaser.Scene {
             if(this.p1Rocket.isFiring == false && !this.gameOver){
                 let xDist = pointer.x - this.p1Rocket.x;
                 let yDist = this.p1Rocket.y - pointer.y;
+                
+                // angle in degrees between rocket and pointer click where +x is 0 degrees and 90 is -y
                 let shotAngle = 180 + Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.p1Rocket.x, this.p1Rocket.y, pointer.x, pointer.y));
 
-                let scaleFactor = Math.sqrt(Math.pow(Math.abs(xDist), 2) + Math.pow(Math.abs(yDist), 2)) / 3;
+                let rocketSpeed = 3;
+                // converts the xDist, yDist components into xSpeed, ySpeed components in order to achieve rocketSpeed (diagonal speed) on combining components
+                // Uses Pythagorean theorum to solve for scaleFactor given a, b, and c where c is rocketSpeed and a, b are xDist, yDist
+                let scaleFactor = Math.sqrt(Math.pow(Math.abs(xDist), 2) + Math.pow(Math.abs(yDist), 2)) / rocketSpeed;
 
+                // Changes speed direction to proper direction and magnitude
                 if(xDist < 0){
                     this.xSpeed = -xDist / scaleFactor;
                 } else {
@@ -59,17 +65,18 @@ class Play extends Phaser.Scene {
                 }            
                 this.ySpeed = yDist / scaleFactor;
 
+                // Change rocket angle to face where it is fired
                 this.p1Rocket.angle = shotAngle - 90;
                 this.p1Rocket.isFiring = true;
 
-                console.log("xSpeed: " + this.xSpeed);
-                console.log("ySpeed: " + this.ySpeed);
-                console.log("xDist: " + xDist);
-                console.log("yDist: " + yDist);
-                console.log("pointer.x: " + pointer.x);
-                console.log("pointer.y: " + pointer.y);
-                console.log("shotAngle: " + shotAngle);
-                console.log("click isFiring: " + this.p1Rocket.isFiring);
+                // console.log("xSpeed: " + this.xSpeed);
+                // console.log("ySpeed: " + this.ySpeed);
+                // console.log("xDist: " + xDist);
+                // console.log("yDist: " + yDist);
+                // console.log("pointer.x: " + pointer.x);
+                // console.log("pointer.y: " + pointer.y);
+                // console.log("shotAngle: " + shotAngle);
+                // console.log("click isFiring: " + this.p1Rocket.isFiring);
             }
         }, this);
 
@@ -194,7 +201,7 @@ class Play extends Phaser.Scene {
     }
 
     pointerShoot(xSpeed, ySpeed){
-        console.log("during isFiring: " + this.p1Rocket.isFiring);
+        // console.log("during isFiring: " + this.p1Rocket.isFiring);
         this.p1Rocket.x -= xSpeed;
         this.p1Rocket.y -= ySpeed;
         // this.sfxRocket.play();

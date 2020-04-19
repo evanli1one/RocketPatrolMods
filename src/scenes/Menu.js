@@ -57,7 +57,7 @@ class Menu extends Phaser.Scene {
         if(Phaser.Input.Keyboard.JustDown(keyRIGHT)) {
             // hard mode
             game.settings = {
-                spaceshipSpeed: 5,
+                spaceshipSpeed: 4,
                 gameTimer: 15000
             }
             this.sound.play('sfx_select');

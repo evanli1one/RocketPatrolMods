@@ -45,31 +45,27 @@ class Play extends Phaser.Scene {
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
         keyESC = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
-        // mouse input
+        // Fire pointer input
         // https://phaser.io/examples/v3/view/input/mouse/mouse-down
         this.input.on('pointerdown', function(pointer) {
             if(this.p1Rocket.isFiring == false && !this.gameOver){
                 let xDist = pointer.x - this.p1Rocket.x;
                 let yDist = this.p1Rocket.y - pointer.y;
+                let rocketSpeed = 3;
                 
-                // angle in degrees between rocket and pointer click where +x is 0 degrees and 90 is -y
+                // Angle in degrees between rocket and pointer click where +x is 0 degrees and 90 is -y
                 let shotAngle = 180 + Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.p1Rocket.x, this.p1Rocket.y, pointer.x, pointer.y));
 
-                let rocketSpeed = 3;
-                // converts the xDist, yDist components into xSpeed, ySpeed components in order to achieve rocketSpeed (diagonal speed) on combining components
+                // Converts the xDist, yDist components into xSpeed, ySpeed components in order to achieve rocketSpeed (diagonal speed) on combining components
                 // Uses Pythagorean theorum to solve for scaleFactor given a, b, and c where c is rocketSpeed and a, b are xDist, yDist
                 let scaleFactor = Math.sqrt(Math.pow(Math.abs(xDist), 2) + Math.pow(Math.abs(yDist), 2)) / rocketSpeed;
 
-                // Changes speed direction to proper direction and magnitude
-                if(xDist < 0){
-                    this.xSpeed = -xDist / scaleFactor;
-                } else {
-                    this.xSpeed = -xDist / scaleFactor;
-                }            
+                // Changes speed components to proper magnitudes (the rocketSpeed)
+                this.xSpeed = -xDist / scaleFactor;       
                 this.ySpeed = yDist / scaleFactor;
 
                 // Change rocket angle to face where it is fired
-                this.p1Rocket.angle = shotAngle - 90;
+                this.p1Rocket.angle = shotAngle - 90; // - 90 due to rocket visual front not being true front
                 this.p1Rocket.isFiring = true;
 
                 // Play audio

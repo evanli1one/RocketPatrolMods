@@ -1,5 +1,6 @@
 /*
-    Mods:
+    Evan Li
+    Mods: 10 + 10 + 15 + 25 + 25 + 25 = 110
     Track a high score that persists across scenes and display it in the UI (10)
     Randomize each spaceship's movement direction at the start of each play (10)
     Display the time remaining (in seconds) on the screen (15)

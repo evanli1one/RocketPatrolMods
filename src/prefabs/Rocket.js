@@ -11,9 +11,9 @@ class Rocket extends Phaser.GameObjects.Sprite {
         // left, right movement
         if(!this.isFiring) {
             if(keyLEFT.isDown && this.x >= 47) {
-                this.x-= 3;
+                this.x-= 5;
             } else if(keyRIGHT.isDown && this.x <= 577) {
-                this.x += 3;
+                this.x += 5;
             }
         }
 

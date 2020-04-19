@@ -156,7 +156,7 @@ class Play extends Phaser.Scene {
             if(this.p1Rocket.isFiring == true){
                 this.pointerShoot(this.xSpeed, this.ySpeed);
             } else {
-                // experimental mouse movement: lock x position to pointer.x when move pointer
+                // experimental mouse movement: lock x position to pointer.x on move pointer
                 // this.input.on('pointermove', function(pointer) {
                 //     if(pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
                 //             this.p1Rocket.x -= 5;

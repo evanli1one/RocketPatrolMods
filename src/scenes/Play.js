@@ -10,7 +10,8 @@ class Play extends Phaser.Scene {
         this.load.image('starfield', './assets/starfield.png');
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame:0, endFrame:9});
-        // Objects remain preloaded across scenes
+        this.load.image('spark', './assets/simple_spark.png');
+        this.load.audio('sfx_rocket', './assets/rocket_shot.wav');
     }
 
     create() {
@@ -37,22 +38,14 @@ class Play extends Phaser.Scene {
         this.ship01 = new Spaceship(this, ship01Rand, 132, 'spaceship', 0, 30, ship01Rand, game.settings.spaceshipSpeed).setOrigin(0, 0);
         this.ship02 = new Spaceship(this, ship02Rand, 196, 'spaceship', 0, 20, ship02Rand, game.settings.spaceshipSpeed).setOrigin(0, 0);
         this.ship03 = new Spaceship(this, ship03Rand, 260, 'spaceship', 0, 10, ship03Rand, game.settings.spaceshipSpeed).setOrigin(0, 0);
-        
-        console.log(this.ship01.direction);
-        console.log(this.ship02.direction);
-        console.log(this.ship03.direction);
-        console.log(this.ship01.x);
-        console.log(this.ship02.x);
-        console.log(this.ship03.x);
 
         // define keyboard keys
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+        keyESC = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
         // mouse input
-        // this.Phaser.Input.Pointer.on('pointerdown', this.p1Rocket.pointerShoot);
-
         // https://phaser.io/examples/v3/view/input/mouse/mouse-down
         this.input.on('pointerdown', function(pointer) {
             if(this.p1Rocket.isFiring == false && !this.gameOver){
@@ -79,14 +72,8 @@ class Play extends Phaser.Scene {
                 this.p1Rocket.angle = shotAngle - 90;
                 this.p1Rocket.isFiring = true;
 
-                // console.log("xSpeed: " + this.xSpeed);
-                // console.log("ySpeed: " + this.ySpeed);
-                // console.log("xDist: " + xDist);
-                // console.log("yDist: " + yDist);
-                // console.log("pointer.x: " + pointer.x);
-                // console.log("pointer.y: " + pointer.y);
-                // console.log("shotAngle: " + shotAngle);
-                // console.log("click isFiring: " + this.p1Rocket.isFiring);
+                // Play audio
+                this.sound.play('sfx_rocket');
             }
         }, this);
 
@@ -110,9 +97,11 @@ class Play extends Phaser.Scene {
                 top: 5,
                 bottom: 5,
             },
-            fixedWidth: 100
+            fixedWidth: 80
         }
-        this.scoreLeft = this.add.text(69,54,this.p1Score, scoreConfig);
+        this.scoreLeft = this.add.text(50,54,this.p1Score, scoreConfig);
+        scoreConfig.fixedWidth = 0;
+        this.highScoreDisp = this.add.text(game.config.width - 300,54,"High score: " + highScore, scoreConfig);
 
         // game over flag
         this.gameOver = false;
@@ -120,13 +109,24 @@ class Play extends Phaser.Scene {
         // play clock
         scoreConfig.fixedWidth = 0;
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 +64, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
+            scoreConfig.fixedWidth = 0;
+            highScore = this.p1Score;
+            this.add.text(game.config.width/2, game.config.height/2 - 64, 'GAME OVER', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
+            scoreConfig.backgroundColor = '#00FF00';
+            scoreConfig.color = "#000";
+            this.add.text(game.config.width/2, game.config.height/2 + 64, 'High score: ' + highScore, scoreConfig).setOrigin(0.5);
+            this.highScoreDisp.setText("High score: " + highScore);
             this.gameOver = true;
         }, null, this);
 
-        // currTime
-        this.timerRight = this.add.text(400,54,'', scoreConfig);
+        // currTime display
+        scoreConfig.fixedWidth = 140;
+        this.timerRight = this.add.text(game.config.width/2 - 150, 54, '', scoreConfig);
+
+        // add particles
+        this.sparks = this.add.particles('spark');
+        this.sparkAccel = 25;
     }
 
     update() {
@@ -135,6 +135,9 @@ class Play extends Phaser.Scene {
             this.scene.restart(this.p1Score);
         }
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
+            this.scene.start("menuScene");
+        }
+        if(Phaser.Input.Keyboard.JustDown(keyESC)) {
             this.scene.start("menuScene");
         }
 
@@ -148,22 +151,21 @@ class Play extends Phaser.Scene {
             this.ship01.update();
             this.ship02.update();
             this.ship03.update();
+
             // shoot rocket toward pointer
             if(this.p1Rocket.isFiring == true){
                 this.pointerShoot(this.xSpeed, this.ySpeed);
             } else {
-                // this.input.on('gameobjectover', function(pointer) {
+                // experimental mouse movement: lock x position to pointer.x when move pointer
+                // this.input.on('pointermove', function(pointer) {
                 //     if(pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
-                //         this.p1Rocket.x -= 5;
-                //     } else if(this.p1Rocket.x <= 577) {
+                //             this.p1Rocket.x -= 5;
+                //     }
+                //     if(pointer.x > this.p1Rocket.x && this.p1Rocket.x <= 577) { 
                 //         this.p1Rocket.x += 5;
                 //     }
-                // }, this);
-                if(Phaser.Input.Pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
-                    this.p1Rocket.x -= 5;
-                } else if(Phaser.Input.Pointer.x > this.p1Rocket.x && this.p1Rocket.x <= 577) {
-                    this.p1Rocket.x += 5;
-                }
+                // }
+            // , this)};
             }
         }
 
@@ -203,6 +205,20 @@ class Play extends Phaser.Scene {
         ship.alpha = 0;
         // create explosion sprite at ship's position
         let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0);
+        // create explosion particles at ship's poisition
+        let emitRectangle = new Phaser.Geom.Rectangle(0, 0, 40, 20);
+        let particleBoom = this.sparks.createEmitter({
+            emitZone: { source: emitRectangle},
+            alpha: { start: 1, end: 0},
+            scale: { start: 4, end: 1},
+            speed: 100,
+            rotate: { min: 0, max: 360 },
+            lifespan: 500,
+            quantity: 2,
+            maxParticles: 15,
+            x: ship.x + 31,
+            y: ship.y + 15, 
+        });
         boom.anims.play('explode');
         boom.on('animationcomplete', () => { // callback after animation
             ship.reset();
@@ -211,30 +227,18 @@ class Play extends Phaser.Scene {
         });
 
         // max time increase
-        this.clock.delay += (ship.points + 10)* 100;
+        this.clock.delay += ship.points * 100;
                 
         // score increment and repaint
         this.p1Score += ship.points;
         this.scoreLeft.text = this.p1Score;
-        // this.sound.play('sfx_explosion');
-        
+        this.sound.play('sfx_explosion');
     }
 
     pointerShoot(xSpeed, ySpeed){
-        // console.log("during isFiring: " + this.p1Rocket.isFiring);
         this.p1Rocket.x -= xSpeed;
         this.p1Rocket.y -= ySpeed;
-        // this.sfxRocket.play();
     }
-
-
-    // pointerMove(pointer) {
-    //     if(pointer.x < this.p1Rocket.x && this.p1Rocket.x >= 47) { 
-    //         this.p1Rocket.x -= 5;
-    //     } else if(this.p1Rocket.x <= 577) {
-    //         this.p1Rocket.x += 5;
-    //     }
-    // }
 
     randStart(){
         let num = Math.floor(Math.random() * 10);

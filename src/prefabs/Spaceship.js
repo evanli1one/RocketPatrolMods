@@ -6,11 +6,15 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);   // add object to existing scene, displayList, updateList
         this.points = pointValue;
         if(direction == 0){
-            this.direction = 1;
-        } else if(direction == game.config.width) {
             this.direction = -1;
+        } else if(direction == game.config.width) {
+            this.direction = 1;
         }
         this.shipSpeed = shipSpeed;
+        
+        if(this.direction == -1){
+            this.flipX = true;
+        }
     }
 
     update() {
@@ -30,9 +34,11 @@ class Spaceship extends Phaser.GameObjects.Sprite {
         if(num >= 4){
             this.x = game.config.width;
             this.direction = 1;
+            this.flipX = false;
         } else {
-            this.x = 0;
+            this.x = 0 - this.width;
             this.direction = -1;
+            this.flipX = true;
         }
     }
 }

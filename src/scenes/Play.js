@@ -108,7 +108,7 @@ class Play extends Phaser.Scene {
             scoreConfig.fixedWidth = 0;
             highScore = this.p1Score;
             this.add.text(game.config.width/2, game.config.height/2 - 64, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2, 'F to Restart or ESC for Menu', scoreConfig).setOrigin(0.5);
             scoreConfig.backgroundColor = '#00FF00';
             scoreConfig.color = "#000";
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'High score: ' + highScore, scoreConfig).setOrigin(0.5);
@@ -130,7 +130,7 @@ class Play extends Phaser.Scene {
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
             this.scene.restart(this.p1Score);
         }
-        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
+        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyESC)) {
             this.scene.start("menuScene");
         }
         if(Phaser.Input.Keyboard.JustDown(keyESC)) {

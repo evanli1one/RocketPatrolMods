@@ -15,10 +15,7 @@ class Rocket extends Phaser.GameObjects.Sprite {
             } else if(keyRIGHT.isDown && this.x <= 577) {
                 this.x += 5;
             }
-        }
-
-        // reset on miss 
-        if(this.y <= 108 || this.y >= 450 || this.x <= 47 || this.x >= 577) {
+        } else if(this.y <= 108 || this.y >= 450 || this.x <= 47 || this.x >= 577) {
             this.reset();
         }
     }
